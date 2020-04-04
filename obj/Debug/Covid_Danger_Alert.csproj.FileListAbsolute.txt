@@ -1,0 +1,17 @@
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\bin\AnyCPU\Debug\Covid_Danger_Alert.exe.config
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\bin\AnyCPU\Debug\Covid_Danger_Alert.exe
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\bin\AnyCPU\Debug\Covid_Danger_Alert.pdb
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\bin\AnyCPU\Debug\Microsoft.Kinect.dll
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\bin\AnyCPU\Debug\Microsoft.Kinect.xml
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Covid_Danger_Alert.csprojAssemblyReference.cache
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\MainWindow.baml
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\MainWindow.g.cs
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\App.g.cs
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Covid_Danger_Alert_MarkupCompile.cache
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Covid_Danger_Alert.g.resources
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Microsoft.Samples.Kinect.Covid_Danger_Alert.Properties.Resources.resources
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Covid_Danger_Alert.csproj.GenerateResource.cache
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Covid_Danger_Alert.csproj.CoreCompileInputs.cache
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Covid_Danger_Alert.csproj.CopyComplete
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Covid_Danger_Alert.exe
+C:\Users\Sebastian Michko\Documents\Covid_Danger_Alert\obj\Debug\Covid_Danger_Alert.pdb

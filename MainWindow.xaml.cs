@@ -45,17 +45,17 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         /// <summary>
         /// Brush used for drawing hands that are currently tracked as closed
         /// </summary>
-        private readonly Brush handClosedBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
+        private readonly Brush handClosedBrush = null;// new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
 
         /// <summary>
         /// Brush used for drawing hands that are currently tracked as opened
         /// </summary>
-        private readonly Brush handOpenBrush = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
+        private readonly Brush handOpenBrush = null;// new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
 
         /// <summary>
         /// Brush used for drawing hands that are currently tracked as in lasso (pointer) position
         /// </summary>
-        private readonly Brush handLassoBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
+        private readonly Brush handLassoBrush = null;// new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
 
         /// <summary>
         /// Brush used for drawing joints that are currently tracked

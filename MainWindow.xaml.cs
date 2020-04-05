@@ -43,21 +43,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         private const float InferredZPositionClamp = 0.1f;
 
         /// <summary>
-        /// Brush used for drawing hands that are currently tracked as closed
-        /// </summary>
-        private readonly Brush handClosedBrush = null;// new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
-
-        /// <summary>
-        /// Brush used for drawing hands that are currently tracked as opened
-        /// </summary>
-        private readonly Brush handOpenBrush = null;// new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
-
-        /// <summary>
-        /// Brush used for drawing hands that are currently tracked as in lasso (pointer) position
-        /// </summary>
-        private readonly Brush handLassoBrush = null;// new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
-
-        /// <summary>
         /// Brush used for drawing joints that are currently tracked
         /// </summary>
         private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
@@ -397,16 +382,13 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                             }
 
                             this.DrawBody(joints, jointPoints, dc, drawPen);
-
-                            this.DrawHand(bodies[i].HandLeftState, jointPoints[JointType.HandLeft], dc);
-                            this.DrawHand(bodies[i].HandRightState, jointPoints[JointType.HandRight], dc);
                         }
                     }
 
                     //Display the Number of bodies tracked currently
                     dc.DrawText(
                                     new FormattedText(
-                                    ("Number of Bodies Detected = " + bodies_currently_observed + "\n" + "Proximity Alert: " + Proximity_Alert()),
+                                    ("Number of Bodies Detected = " + bodies_currently_observed + "\nProximity Alert: " + Proximity_Alert() + "\nFace Touch Alert: " + Contamination_Alert()),
                                     CultureInfo.GetCultureInfo("en-us"),
                                     FlowDirection.LeftToRight,
                                     new Typeface("Georgia"),
@@ -429,8 +411,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
 
                     //    Debug.Print("#" + i + "/" + (bodies.Length - 1) + " " + (bodies[i].IsTracked) + " " + head_position.X + " " + head_position.Y + " " + head_position.Z + " " + Find_Distance(head, left_hand) + " " + Find_Distance(head, right_hand) );
                     //}
-                    Debug.Print("Proximity Alert: " + Proximity_Alert());
-                    //Debug.Print("\n");
 
                         // prevent drawing outside of our render area
                     this.drawingGroup.ClipGeometry = new RectangleGeometry(this.displayRect);//new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
@@ -505,30 +485,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
             }
 
             drawingContext.DrawLine(drawPen, jointPoints[jointType0], jointPoints[jointType1]);
-        }
-
-        /// <summary>
-        /// Draws a hand symbol if the hand is tracked: red circle = closed, green circle = opened; blue circle = lasso
-        /// </summary>
-        /// <param name="handState">state of the hand</param>
-        /// <param name="handPosition">position of the hand</param>
-        /// <param name="drawingContext">drawing context to draw to</param>
-        private void DrawHand(HandState handState, Point handPosition, DrawingContext drawingContext)
-        {
-            switch (handState)
-            {
-                case HandState.Closed:
-                    drawingContext.DrawEllipse(this.handClosedBrush, null, handPosition, HandSize, HandSize);
-                    break;
-
-                case HandState.Open:
-                    drawingContext.DrawEllipse(this.handOpenBrush, null, handPosition, HandSize, HandSize);
-                    break;
-
-                case HandState.Lasso:
-                    drawingContext.DrawEllipse(this.handLassoBrush, null, handPosition, HandSize, HandSize);
-                    break;
-            }
         }
 
         /// <summary>
@@ -665,36 +621,24 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
 
         private bool Contamination_Alert()//Indexes are randomly assigned for some reason.
         {
-            //Method 1
-            //Iterate through all bodies and make a new list of ones that are actively tracked
-            //Double for Loop to check all bodies past eachother to find distance
+            bool ped_face_touch = false;
+            float min_distance = 0.3f;
 
-
-            //Method 2
-            //Double for Loop to check all bodies past eachother to find distance
-            //In each loop check if actively tracked.
-            bool ped_ped_in_proximity = false;
-            float min_distance = 1.0f;
-
-            for (int x = 0; x < bodies.Length; ++x)
+            for (int index = 0; index < bodies.Length; ++index)
             {
-                if (bodies[x].IsTracked)
+                if (bodies[index].IsTracked)
                 {
-                    for (int y = 0; y < bodies.Length; ++y)
+                    var head = bodies[index].Joints[JointType.Head];
+                    var left_hand = bodies[index].Joints[JointType.HandLeft];
+                    var right_hand = bodies[index].Joints[JointType.HandRight];
+
+                    if (Find_Distance(head, left_hand) < min_distance || Find_Distance(head, right_hand) < min_distance)
                     {
-                        if (bodies[y].IsTracked && (x != y))
-                        {
-                            double temp_dist = Find_Distance_Ped_Ped(x, y);
-                            if (temp_dist < min_distance)
-                            {
-                                ped_ped_in_proximity = true;
-                            }
-                            Debug.Print("Distance = " + temp_dist);
-                        }
+                        ped_face_touch = true;
                     }
                 }
             }
-            return ped_ped_in_proximity;
+            return ped_face_touch;
         }
 
         /// <summary>
@@ -710,9 +654,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
 
             string faceText = string.Empty;
 
-            // extract face rotation in degrees as Euler angles
-            //if (faceResult.FaceRotationQuaternion != null)
-            //{
             var head = bodies[faceIndex].Joints[JointType.Head];
             var left_hand = bodies[faceIndex].Joints[JointType.HandLeft];
             var right_hand = bodies[faceIndex].Joints[JointType.HandRight];
@@ -720,7 +661,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                 faceText += "Pedestrian Index " + faceIndex + "\n" +
                             "Left Hand-Face Dist " + Find_Distance(head, left_hand) + "m\n" +
                             "Right Hand-Face Dist " + Find_Distance(head, right_hand)+  "m\n";
-            //}
 
             // render the face property and face rotation information
             Point faceTextLayout;

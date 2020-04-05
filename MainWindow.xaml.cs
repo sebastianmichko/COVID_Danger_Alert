@@ -141,6 +141,16 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
 
             private Rect displayRect;
 
+        System.Media.SoundPlayer alarm_1 = new System.Media.SoundPlayer(Path.Combine(Environment.CurrentDirectory, @"Audio\alarm_1.wav"));
+        System.Media.SoundPlayer alarm_2 = new System.Media.SoundPlayer(Path.Combine(Environment.CurrentDirectory, @"Audio\alarm_2.wav"));
+
+        //Alert Global Functons
+        bool global_proximity_alert = false;
+        bool global_contamination_alert = false;
+        bool alarm_currently_playing = false;
+
+
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -385,10 +395,31 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                         }
                     }
 
+                    //Check for alerts
+                    global_contamination_alert = Contamination_Alert();
+                    global_proximity_alert = Proximity_Alert();
+
+                    //Play Audio Alerts
+
+                    //Face-Touch Contamination
+                    if(global_contamination_alert && !alarm_currently_playing)
+                    {
+                        alarm_currently_playing = true;
+                        alarm_1.PlayLooping();
+                        Debug.Print("Cur True");
+                    }
+                    else if (!global_contamination_alert)
+                    {
+                        Debug.Print("cur false");
+
+                        alarm_1.Stop();
+                        alarm_currently_playing = false;
+                    }
+
                     //Display the Number of bodies tracked currently
                     dc.DrawText(
                                     new FormattedText(
-                                    ("Number of Bodies Detected = " + bodies_currently_observed + "\nProximity Alert: " + Proximity_Alert() + "\nFace Touch Alert: " + Contamination_Alert()),
+                                    ("Number of Bodies Detected = " + bodies_currently_observed + "\nProximity Alert: " + global_proximity_alert + "\nFace Touch Alert: " + global_contamination_alert),
                                     CultureInfo.GetCultureInfo("en-us"),
                                     FlowDirection.LeftToRight,
                                     new Typeface("Georgia"),
@@ -616,6 +647,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                     }
                 }
             }
+
             return ped_ped_in_proximity;
         }
 
@@ -638,6 +670,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                     }
                 }
             }
+
             return ped_face_touch;
         }
 

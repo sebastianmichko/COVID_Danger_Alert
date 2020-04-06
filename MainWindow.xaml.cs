@@ -147,8 +147,8 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         //Alert Global Functons
         bool global_proximity_alert = false;
         bool global_contamination_alert = false;
-        bool alarm_currently_playing = false;
-
+        bool proximity_alarm_currently_playing = false;
+        bool contamination_alarm_currently_playing = false;
 
 
         /// <summary>
@@ -401,20 +401,45 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
 
                     //Play Audio Alerts
 
-                    //Face-Touch Contamination
-                    if(global_contamination_alert && !alarm_currently_playing)
+                    //Face-Touch Contamination Alert
+                    if (global_contamination_alert)
                     {
-                        alarm_currently_playing = true;
-                        alarm_1.PlayLooping();
-                        Debug.Print("Cur True");
+                        if (!contamination_alarm_currently_playing && !proximity_alarm_currently_playing)
+                        {
+                            contamination_alarm_currently_playing = true;
+                            alarm_1.PlayLooping();
+                        }
                     }
-                    else if (!global_contamination_alert)
+                    else
                     {
-                        Debug.Print("cur false");
+                        if (contamination_alarm_currently_playing)
+                        {
+                            alarm_1.Stop();
+                            contamination_alarm_currently_playing = false;
+                        }
+                    }
 
-                        alarm_1.Stop();
-                        alarm_currently_playing = false;
+                    //Ped - Ped Proximity Alert - SHOULD BE THE MASTER ALARM IF THIS ONE IS ACTIVE THEN A FACE ALARM WON'T MATTER
+                    if (global_proximity_alert)
+                    {
+                        if (!proximity_alarm_currently_playing)
+                        {
+                            contamination_alarm_currently_playing = false;
+                            alarm_1.Stop();
+
+                            proximity_alarm_currently_playing = true;
+                            alarm_2.PlayLooping();
+                        }
                     }
+                    else
+                    {
+                        if (proximity_alarm_currently_playing)
+                        {
+                            alarm_2.Stop();
+                            proximity_alarm_currently_playing = false;
+                        }
+                    }
+
 
                     //Display the Number of bodies tracked currently
                     dc.DrawText(

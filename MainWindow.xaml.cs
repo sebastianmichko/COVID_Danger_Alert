@@ -103,11 +103,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         private int displayHeight;
 
         /// <summary>
-        /// List of colors for each body tracked
-        /// </summary>
-        private List<Pen> bodyColors;
-
-        /// <summary>
         /// Current status text to display
         /// </summary>
         private string statusText = null;
@@ -150,6 +145,8 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         bool proximity_alarm_currently_playing = false;
         bool contamination_alarm_currently_playing = false;
 
+        private List<int> proximity_alert_offenders = new List<int>();
+        private List<int> contamination_alert_offenders = new List<int>();
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -209,16 +206,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
             this.bones.Add(new Tuple<JointType, JointType>(JointType.HipLeft, JointType.KneeLeft));
             this.bones.Add(new Tuple<JointType, JointType>(JointType.KneeLeft, JointType.AnkleLeft));
             this.bones.Add(new Tuple<JointType, JointType>(JointType.AnkleLeft, JointType.FootLeft));
-
-            // populate body colors, one for each BodyIndex
-            this.bodyColors = new List<Pen>();
-
-            this.bodyColors.Add(new Pen(Brushes.Red, 6));
-            this.bodyColors.Add(new Pen(Brushes.Orange, 6));
-            this.bodyColors.Add(new Pen(Brushes.Green, 6));
-            this.bodyColors.Add(new Pen(Brushes.Blue, 6));
-            this.bodyColors.Add(new Pen(Brushes.Indigo, 6));
-            this.bodyColors.Add(new Pen(Brushes.Violet, 6));
 
             // set IsAvailableChanged event notifier
             this.kinectSensor.IsAvailableChanged += this.Sensor_IsAvailableChanged;
@@ -351,15 +338,23 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                     // Draw a transparent background to set the render size
                     //dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                     dc.DrawRectangle(Brushes.Black, null, this.displayRect);
-                    int penIndex = 0;
 
                     //Count Bodies Observed
                     bodies_currently_observed = 0;
 
+                    //Check for alerts
+                    global_contamination_alert = Contamination_Alert();
+                    global_proximity_alert = Proximity_Alert();
+
                     //foreach (Body body in this.bodies)
                     for (int i = 0; i < this.bodies.Length; i++)
+                    {
+                        //Change pen color to red if that pedestrian is currently causing an alert
+                        Pen drawPen = new Pen(Brushes.White, 6);
+                        if (proximity_alert_offenders.Contains(i) || contamination_alert_offenders.Contains(i))
                         {
-                        Pen drawPen = this.bodyColors[penIndex++];
+                            drawPen = new Pen(Brushes.Red, 6);
+                        }                        
 
                         this.DrawFaceFrameResults(i, dc);
 
@@ -394,10 +389,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                             this.DrawBody(joints, jointPoints, dc, drawPen);
                         }
                     }
-
-                    //Check for alerts
-                    global_contamination_alert = Contamination_Alert();
-                    global_proximity_alert = Proximity_Alert();
 
                     //Play Audio Alerts
 
@@ -643,15 +634,8 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
 
         private bool Proximity_Alert()//Indexes are randomly assigned for some reason.
         {
-            //Method 1
-                //Iterate through all bodies and make a new list of ones that are actively tracked
-                //Double for Loop to check all bodies past eachother to find distance
-
-
-            //Method 2
-                //Double for Loop to check all bodies past eachother to find distance
-                    //In each loop check if actively tracked.
             bool ped_ped_in_proximity = false;
+            proximity_alert_offenders.Clear();
             float min_distance = 1.0f;
 
             for(int x = 0; x < bodies.Length; ++x)
@@ -666,8 +650,10 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                             if (temp_dist < min_distance)
                             {
                                 ped_ped_in_proximity = true;
+                                proximity_alert_offenders.Add(x);
+                                proximity_alert_offenders.Add(y);
                             }
-                            Debug.Print("Distance = " + temp_dist);
+                            //Debug.Print("Distance = " + temp_dist);
                         }
                     }
                 }
@@ -679,6 +665,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         private bool Contamination_Alert()//Indexes are randomly assigned for some reason.
         {
             bool ped_face_touch = false;
+            contamination_alert_offenders.Clear();
             float min_distance = 0.3f;
 
             for (int index = 0; index < bodies.Length; ++index)
@@ -692,6 +679,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                     if (Find_Distance(head, left_hand) < min_distance || Find_Distance(head, right_hand) < min_distance)
                     {
                         ped_face_touch = true;
+                        contamination_alert_offenders.Add(index);
                     }
                 }
             }

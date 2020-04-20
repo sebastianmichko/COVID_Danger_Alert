@@ -16,6 +16,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using Microsoft.Kinect;
+    using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for MainWindow
@@ -117,13 +118,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         /// </summary>
         private int bodies_currently_observed = 0;
 
-        //Body/Pedestrian Class
-
-
-        //List of Bodies
-
-        //Overlay Stuff from Face Basics
-
         /// <summary>
         /// Text layout offset in X axis
         /// </summary>
@@ -148,11 +142,24 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         private List<int> proximity_alert_offenders = new List<int>();
         private List<int> contamination_alert_offenders = new List<int>();
 
+        //Visual ALert Images
+        BitmapImage proximity_alert_image = new BitmapImage();
+        BitmapImage contamination_alert_image = new BitmapImage();
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
         {
+            //Visual Alert Loading
+            proximity_alert_image.BeginInit();
+            proximity_alert_image.UriSource = new Uri("prox_visual_alert.bmp", UriKind.Relative);
+            proximity_alert_image.EndInit();
+
+            contamination_alert_image.BeginInit();
+            contamination_alert_image.UriSource = new Uri("contamination_visual_alert.bmp", UriKind.Relative);
+            contamination_alert_image.EndInit();
+
             // one sensor is currently supported
             this.kinectSensor = KinectSensor.GetDefault();
 
@@ -226,7 +233,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
             // use the window object as the view model in this simple example
             this.DataContext = this;
 
-            // initialize the components (controls) of the window
+            // initialize the components (controls) of the window - This is where it sets the image source
             this.InitializeComponent();
         }
 
@@ -242,7 +249,22 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
         {
             get
             {
-                return this.imageSource;
+                //I have no idea why, but this needs to be there or it won't change the imagesource to the contamination or proximity images. 
+                //Hypothesis: Possibly by accessing a member variable(Height) from each BitmapImage the images are then loaded into memory, but not before their initial call.
+                double temp = proximity_alert_image.Height + contamination_alert_image.Height;
+
+                if (global_proximity_alert)
+                {
+                    return proximity_alert_image;
+                }
+                else if (global_contamination_alert)
+                {
+                    return contamination_alert_image;
+                }
+                else
+                {
+                    return this.imageSource;
+                }
             }
         }
 
@@ -391,6 +413,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                     }
 
                     //Play Audio Alerts
+                    //this.PropertyChanged(this, new PropertyChangedEventArgs("ImageSource"));
 
                     //Face-Touch Contamination Alert
                     if (global_contamination_alert)
@@ -399,6 +422,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                         {
                             contamination_alarm_currently_playing = true;
                             alarm_1.PlayLooping();
+                            this.PropertyChanged(this, new PropertyChangedEventArgs("ImageSource"));
                         }
                     }
                     else
@@ -407,6 +431,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                         {
                             alarm_1.Stop();
                             contamination_alarm_currently_playing = false;
+                            this.PropertyChanged(this, new PropertyChangedEventArgs("ImageSource"));
                         }
                     }
 
@@ -420,6 +445,8 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
 
                             proximity_alarm_currently_playing = true;
                             alarm_2.PlayLooping();
+                            this.PropertyChanged(this, new PropertyChangedEventArgs("ImageSource"));
+
                         }
                     }
                     else
@@ -428,6 +455,7 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                         {
                             alarm_2.Stop();
                             proximity_alarm_currently_playing = false;
+                            this.PropertyChanged(this, new PropertyChangedEventArgs("ImageSource"));
                         }
                     }
 
@@ -443,21 +471,6 @@ namespace Microsoft.Samples.Kinect.Covid_Danger_Alert
                                     Brushes.White),
                                     new Point(displayWidth / 2, displayHeight - 50)
                                 );
-
-                    //Debug.Print("distance between Ped 1 & 2 = " + Find_Distance_Ped_Ped(0, 1));
-                    //for(int i = 0; i < bodies.Length; i++)
-                    //{
-                    //    var head = bodies[i].Joints[JointType.Head];
-                    //    var left_hand = bodies[i].Joints[JointType.HandLeft];
-                    //    var right_hand = bodies[i].Joints[JointType.HandRight];
-
-                    //    var head_position = head.Position;
-                    //    var left_hand_position = left_hand.Position;
-                    //    var right_hand_position = right_hand.Position;
-                         
-
-                    //    Debug.Print("#" + i + "/" + (bodies.Length - 1) + " " + (bodies[i].IsTracked) + " " + head_position.X + " " + head_position.Y + " " + head_position.Z + " " + Find_Distance(head, left_hand) + " " + Find_Distance(head, right_hand) );
-                    //}
 
                         // prevent drawing outside of our render area
                     this.drawingGroup.ClipGeometry = new RectangleGeometry(this.displayRect);//new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
